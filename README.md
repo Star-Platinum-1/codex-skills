@@ -22,3 +22,7 @@ Local knowledge base for Codex, stored at `D:\codex\obsidian`.
 5. Share `05-Shared` notes through Feishu.
 
 The GitHub repository `Star-Platinum-1/codex-skills` is the shared source for reusable Codex skills. The local vault is the working knowledge layer; Feishu is the communication and sharing layer.
+
+## Shared Repository
+
+`Star-Platinum-1/codex-skills` is a public, reviewed catalog of Codex skills and plugin examples maintained by the team.

@@ -1,12 +1,15 @@
-$secret = Read-Host "请输入飞书 App Secret（输入时不会显示）" -AsSecureString
+$secret = Read-Host "Enter Feishu App Secret (input is hidden)" -AsSecureString
 $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
 try {
     $plain = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
     [Environment]::SetEnvironmentVariable("FEISHU_APP_SECRET", $plain, "User")
     $env:FEISHU_APP_SECRET = $plain
-    Write-Host "已写入当前用户环境变量 FEISHU_APP_SECRET。"
-} finally {
-    if ($ptr -ne [IntPtr]::Zero) { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
+    Write-Host "FEISHU_APP_SECRET was set for the current user."
+}
+finally {
+    if ($ptr -ne [IntPtr]::Zero) {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+    }
     $plain = $null
 }
 

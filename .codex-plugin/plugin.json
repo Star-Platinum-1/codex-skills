@@ -1,0 +1,21 @@
+{
+  "name": "codex-skills",
+  "version": "0.1.0",
+  "description": "Shared, reviewed Codex skills and plugin examples for our team.",
+  "author": {
+    "name": "Star-Platinum-1"
+  },
+  "repository": "https://github.com/Star-Platinum-1/codex-skills",
+  "license": "MIT",
+  "keywords": ["codex", "skills", "plugins"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Team Codex Skills",
+    "shortDescription": "Shared and reviewed Codex skills",
+    "longDescription": "A public catalog of practical Codex skills maintained by our team.",
+    "developerName": "Star-Platinum-1",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": ["Review a candidate skill", "Find useful Codex skills", "Prepare a skill for sharing"]
+  }
+}

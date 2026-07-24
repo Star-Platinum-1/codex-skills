@@ -23,6 +23,13 @@ async function request(path, options = {}) {
   return body;
 }
 
+async function apiRequest(path, token, options = {}) {
+  return request(path, {
+    ...options,
+    headers: { Authorization: `Bearer ${token}`, ...(options.headers || {}) },
+  });
+}
+
 async function getTenantToken() {
   const result = await request("/auth/v3/tenant_access_token/internal", {
     method: "POST",
@@ -43,6 +50,29 @@ async function listSharedNotes(dir, output = []) {
   return output;
 }
 
+async function publishNote(token, filePath) {
+  const markdown = await (await import("node:fs/promises")).readFile(filePath, "utf8");
+  const title = markdown.match(/^#\s+(.+)$/m)?.[1] || filePath.split(/[\\/]/).pop().replace(/\.md$/i, "");
+  const created = await apiRequest("/docx/v1/documents", token, {
+    method: "POST",
+    body: JSON.stringify({ title, ...(process.env.FEISHU_FOLDER_TOKEN ? { folder_token: process.env.FEISHU_FOLDER_TOKEN } : {}) }),
+  });
+  const documentId = created.data?.document?.document_id;
+  if (!documentId) throw new Error("Feishu did not return a document id");
+  const content = markdown.replace(/^#\s+.+\n?/, "").trim();
+  if (content) {
+    const children = content.split(/\r?\n/).filter(Boolean).map((line) => ({
+      block_type: 2,
+      text: { elements: [{ text_run: { content: line.replace(/^[-*]\s+/, "") } }] },
+    }));
+    await apiRequest(`/docx/v1/documents/${documentId}/blocks/${documentId}/children`, token, {
+      method: "POST",
+      body: JSON.stringify({ children, index: 0 }),
+    });
+  }
+  return { title, documentId, url: `https://feishu.cn/docx/${documentId}` };
+}
+
 const token = await getTenantToken();
 const command = process.argv[2] || "check";
 
@@ -51,8 +81,12 @@ if (command === "check") {
 } else if (command === "manifest") {
   const notes = await listSharedNotes(sharedDir);
   console.log(JSON.stringify({ source: sharedDir, count: notes.length, notes }, null, 2));
+} else if (command === "publish") {
+  const file = process.argv[3];
+  if (!file) throw new Error("Usage: ... feishu-sync.mjs publish <markdown-file>");
+  console.log(JSON.stringify(await publishNote(token, file), null, 2));
 } else {
-  console.error("Usage: node 99-System/feishu-sync.mjs [check|manifest]");
+  console.error("Usage: node 99-System/feishu-sync.mjs [check|manifest|publish <markdown-file>]");
   process.exit(1);
 }
 
